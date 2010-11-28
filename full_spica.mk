@@ -2,9 +2,6 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full.mk)
 
-# Inherit some common SamdroidMod stuff.
-$(call inherit-product, vendor/spica/products/common.mk)
-
 PRODUCT_SPECIFIC_DEFINES += TARGET_PRELINKER_MAP=$(TOP)/vendor/spica/prelink-linux-arm-spica.map
 
 DEVICE_PACKAGE_OVERLAYS += device/samsung/spica/overlay
