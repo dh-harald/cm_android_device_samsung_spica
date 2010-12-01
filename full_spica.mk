@@ -134,6 +134,12 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/placeholder/.placeholder:system/sd/.placeholder
 
 #
+# system/xmister - for kernel tweaks
+#
+PRODUCT_COPY_FILES += \
+    device/samsung/spica/prebuilt/spica/placeholder/.placeholder:system/xmister/.placeholder
+
+#
 # Setup device specific product configuration.
 #
 PRODUCT_NAME := full_spica
