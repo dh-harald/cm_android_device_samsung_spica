@@ -77,6 +77,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/common/bin/compcache:system/bin/compcache \
     device/samsung/spica/prebuilt/common/bin/handle_compcache:system/bin/handle_compcache \
     device/samsung/spica/prebuilt/common/lib/libncurses.so:system/lib/libncurses.so \
+    device/samsung/spica/prebuilt/common/etc/init.d/01xmister:system/etc/init.d/01xmister \
     device/samsung/spica/prebuilt/common/etc/init.d/03firstboot:system/etc/init.d/03firstboot \
     device/samsung/spica/prebuilt/common/etc/init.d/04apps2sd:system/etc/init.d/04apps2sd \
     device/samsung/spica/prebuilt/common/etc/init.d/05apps2sdoff:system/etc/init.d/05apps2sdoff \
