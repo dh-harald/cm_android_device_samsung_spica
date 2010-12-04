@@ -90,7 +90,7 @@ void Akmd::sleep_until_next_update()
      * possible.
      */
     if (delay <= 60) {
-        delay = 25;
+        delay = 21;
     } else {
         /* divide by 2 to get 2 real samples for the slow modes too. */
         delay /= 2;
