@@ -34,8 +34,27 @@ int BMA020::get_delay()
     return -1;
 }
 
+void BMA020::calibrate()
+{
+    const int REFRESH = 10;
+    const float ERROR = 0.05f;
+    const float GRAVITY_SMOOTH = 0.8f;
+
+    accelerometer_g = accelerometer_g.multiply(GRAVITY_SMOOTH).add(a.multiply(1.0f - GRAVITY_SMOOTH));
+
+    float al = a.length();
+    float gl = accelerometer_g.length();
+
+    if (al == 0 || gl == 0) {
+        return;
+    }
+
+}
+
 void BMA020::measure()
 {
+    SUCCEED(gettimeofday(&next_update, NULL) == 0);
+
     bma020acc_t accels;
     
     SUCCEED(ioctl(fd, BMA020_READ_ACCEL_XYZ, &accels) == 0);
@@ -45,6 +64,8 @@ void BMA020::measure()
     index = (index + 1) & 1;
 
     a = abuf[0].add(abuf[1]).multiply(0.5f * (720.0f / 256.0f));
+
+    calibrate();
 }
 
 Vector BMA020::read()
