@@ -15,9 +15,15 @@ class BMA020 : public ChipReader {
     /* Open file descriptors */
     int fd;
 
+    Vector accelerometer_g;
+
+    struct timeval next_update;
     int index;
     Vector abuf[2];
     Vector a;
+
+    private:
+    void calibrate();
 
     public:
     BMA020();
