@@ -12,5 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+LOCAL_PATH:= $(call my-dir)
 
-include $(call all-named-subdir-makefiles, libsensors liblights alsa_sound gps camera akmd)
+ifneq ($(TARGET_SIMULATOR),true)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := lights.GT-I5700
+
+LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
+
+LOCAL_SRC_FILES := lights.c
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_PRELINK_MODULE := false
+
+include $(BUILD_SHARED_LIBRARY)
+
+endif # !TARGET_SIMULATOR
