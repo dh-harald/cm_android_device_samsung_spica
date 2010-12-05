@@ -74,10 +74,11 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/keys/s3c-keypad-rev0020.kcm.bin:system/usr/keychars/s3c-keypad-rev0020.kcm.bin
 
 #
-# Only copybit left ;)
+# HW libraries: copybit, lights
 #
 PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/hw/copybit.GT-I5700.so:system/lib/hw/copybit.GT-I5700.so
+    device/samsung/spica/prebuilt/spica/hw/copybit.GT-I5700.so:system/lib/hw/copybit.GT-I5700.so \
+    device/samsung/spica/prebuilt/spica/hw/lights.GT-I5700.so:system/lib/hw/lights.GT-I5700.so
 
 #
 # Vold
