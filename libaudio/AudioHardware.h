@@ -25,6 +25,8 @@
 
 #include <hardware_legacy/AudioHardwareBase.h>
 
+//#include "secril-client.h"
+
 extern "C" {
     struct pcm;
     struct mixer;
@@ -43,9 +45,9 @@ namespace android {
 // Default audio output sample format
 #define AUDIO_HW_OUT_FORMAT (AudioSystem::PCM_16_BIT)
 // Kernel pcm out buffer size in frames at 44.1kHz
-#define AUDIO_HW_OUT_PERIOD_MULT 8 // (8 * 128 = 1024 frames)
+#define AUDIO_HW_OUT_PERIOD_MULT 4 // (8 * 128 = 1024 frames)
 #define AUDIO_HW_OUT_PERIOD_SZ (PCM_PERIOD_SZ_MIN * AUDIO_HW_OUT_PERIOD_MULT)
-#define AUDIO_HW_OUT_PERIOD_CNT 4
+#define AUDIO_HW_OUT_PERIOD_CNT 2
 // Default audio output buffer size in bytes
 #define AUDIO_HW_OUT_PERIOD_BYTES (AUDIO_HW_OUT_PERIOD_SZ * 2 * sizeof(int16_t))
 
@@ -64,7 +66,8 @@ namespace android {
 // Default audio input buffer size in bytes (8kHz mono)
 #define AUDIO_HW_IN_PERIOD_BYTES ((AUDIO_HW_IN_PERIOD_SZ*sizeof(int16_t))/8)
 
-#define INPUT_SOURCE_KEY "Input Source"
+//#define INPUT_SOURCE_KEY "Input Source"
+//#define VIOCE_MEMO_PATH_KEY "Voice Memo Path"
 
 class AudioHardware : public AudioHardwareBase
 {
@@ -106,10 +109,12 @@ public:
             const char *getOutputRouteFromDevice(uint32_t device);
             const char *getInputRouteFromDevice(uint32_t device);
             const char *getVoiceRouteFromDevice(uint32_t device);
+            const char *getMicPathFromDevice();
 
             status_t setIncallPath_l(uint32_t device);
+            status_t setVoiceMemoPath_l(String8 path);
 
-            status_t setInputSource_l(String8 source);
+//            status_t setInputSource_l(String8 source);
 
     static uint32_t    getInputSampleRate(uint32_t sampleRate);
            sp <AudioStreamInALSA> getActiveInput_l();
@@ -142,7 +147,21 @@ private:
 
     String8         mInputSource;
     bool            mBluetoothNrec;
+/*
+    void*           mSecRilLibHandle;
+    HRilClient      mRilClient;
     bool            mActivatedCP;
+    HRilClient      (*openClientRILD)  (void);
+    int             (*disconnectRILD)  (HRilClient);
+    int             (*closeClientRILD) (HRilClient);
+    int             (*isConnectedRILD) (HRilClient);
+    int             (*connectRILD)     (HRilClient);
+    int             (*setCallVolume)   (HRilClient, SoundType, int);
+    int             (*setCallAudioPath)(HRilClient, AudioPath);
+    int             (*setCallClockSync)(HRilClient, SoundClockCondition);
+    void            loadRILD(void);
+    status_t        connectRILDIfRequired(void);
+*/
     //  trace driver operations for dump
     int             mDriverOp;
 

@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "AudioPolicyManager"
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 #include <utils/Log.h>
 #include "AudioPolicyManager.h"
 #include <media/mediarecorder.h>
@@ -46,9 +46,10 @@ extern "C" void destroyAudioPolicyManager(AudioPolicyInterface *interface)
 status_t AudioPolicyManager::startInput(audio_io_handle_t input)
 {
     status_t status = AudioPolicyManagerBase::startInput(input);
-
+/*
     if (status == NO_ERROR) {
         AudioInputDescriptor *inputDesc = mInputs.valueFor(input);
+
         String8 key = String8("Input Source");
         String8 value;
         switch(inputDesc->mInputSource) {
@@ -67,7 +68,9 @@ status_t AudioPolicyManager::startInput(audio_io_handle_t input)
         AudioParameter param = AudioParameter();
         param.add(key, value);
         mpClientInterface->setParameters(input, param.toString());
+
     }
+*/
     return status;
 }
 

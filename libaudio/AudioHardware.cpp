@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 #define LOG_TAG "AudioHardware"
 
@@ -44,12 +44,12 @@ extern "C" {
 namespace android {
 
 const uint32_t AudioHardware::inputSamplingRates[] = {
-        8000, 11025, 16000, 22050, 44100
+        8000, 11025, 16000, 22050, 44100, 48000
 };
 
 //  trace driver operations for dump
 //
-#define DRIVER_TRACE
+//#define DRIVER_TRACE
 
 enum {
     DRV_NONE,
@@ -83,9 +83,18 @@ AudioHardware::AudioHardware() :
     mInCallAudioMode(false),
     mInputSource("Default"),
     mBluetoothNrec(true),
-    mActivatedCP(false),
     mDriverOp(DRV_NONE)
 {
+    // audio hardware may started in kernel. make into idle mode first.
+    openMixer_l();
+    if (mMixer != NULL) {
+        struct mixer_ctl *ctl = mixer_get_control(mMixer, "Idle Mode", 0);
+        if (ctl != NULL) 
+            mixer_ctl_select(ctl, "ON");
+    }
+    closeMixer_l();
+    mMixer = NULL;
+
     mInit = true;
 }
 
@@ -163,6 +172,7 @@ void AudioHardware::closeOutputStream(AudioStreamOut* out) {
             return;
         }
         spOut = mOutput;
+        spOut->close_l();
         mOutput.clear();
     }
     spOut.clear();
@@ -219,6 +229,7 @@ void AudioHardware::closeInputStream(AudioStreamIn* in) {
             return;
         }
         spIn = mInputs[index];
+        spIn->close_l();
         mInputs.removeAt(index);
     }
     LOGV("AudioHardware::closeInputStream()%p", in);
@@ -281,12 +292,6 @@ status_t AudioHardware::setMode(int mode)
     status = AudioHardwareBase::setMode(mode);
     LOGV("setMode() : new %d, old %d", mMode, prevMode);
     if (status == NO_ERROR) {
-        // activate call clock in radio when entering in call or ringtone mode
-        if (prevMode == AudioSystem::MODE_NORMAL)
-        {
-            mActivatedCP = true;
-        }
-
         if (mMode == AudioSystem::MODE_IN_CALL && !mInCallAudioMode) {
             if (spOut != 0) {
                 LOGV("setMode() in call force output standby");
@@ -300,11 +305,9 @@ status_t AudioHardware::setMode(int mode)
             LOGV("setMode() openPcmOut_l()");
             openPcmOut_l();
             openMixer_l();
-            setInputSource_l(String8("Default"));
             mInCallAudioMode = true;
         }
         if (mMode == AudioSystem::MODE_NORMAL && mInCallAudioMode) {
-            setInputSource_l(mInputSource);
             if (mMixer != NULL) {
                 TRACE_DRIVER_IN(DRV_MIXER_GET)
                 struct mixer_ctl *ctl= mixer_get_control(mMixer, "Playback Path", 0);
@@ -331,11 +334,6 @@ status_t AudioHardware::setMode(int mode)
 
             mInCallAudioMode = false;
         }
-
-        if (mMode == AudioSystem::MODE_NORMAL) {
-            if(mActivatedCP)
-                mActivatedCP = false;
-        }
     }
 
     if (spIn != 0) {
@@ -356,10 +354,7 @@ status_t AudioHardware::setMicMute(bool state)
         AutoMutex lock(mLock);
         if (mMicMute != state) {
             mMicMute = state;
-            // in call mute is handled by RIL
-            if (mMode != AudioSystem::MODE_IN_CALL) {
-                spIn = getActiveInput_l();
-            }
+            spIn = getActiveInput_l();
         }
     }
 
@@ -419,7 +414,7 @@ size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int ch
         return 0;
     }
     if (sampleRate != 8000 && sampleRate != 11025 && sampleRate != 16000 &&
-            sampleRate != 22050 && sampleRate != 44100) {
+            sampleRate != 22050 && sampleRate != 32000 && sampleRate != 44100 && sampleRate != 48000) {
         LOGW("getInputBufferSize bad sample rate: %d", sampleRate);
         return 0;
     }
@@ -430,53 +425,32 @@ size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int ch
 
 status_t AudioHardware::setVoiceVolume(float volume)
 {
-    LOGD("### setVoiceVolume");
+    LOGD("### setVoiceVolume: %f", volume);
 
     AutoMutex lock(mLock);
-/* FIX this !
-    if ( (AudioSystem::MODE_IN_CALL == mMode) && (mSecRilLibHandle) &&
-         (connectRILDIfRequired() == OK) ) {
 
-        uint32_t device = AudioSystem::DEVICE_OUT_EARPIECE;
-        if (mOutput != 0) {
-            device = mOutput->device();
-        }
-        int int_volume = (int)(volume * 5);
-        SoundType type;
-
-        LOGD("### route(%d) call volume(%f)", device, volume);
-        switch (device) {
-            case AudioSystem::DEVICE_OUT_EARPIECE:
-                LOGD("### earpiece call volume");
-                type = SOUND_TYPE_VOICE;
-                break;
-
-            case AudioSystem::DEVICE_OUT_SPEAKER:
-                LOGD("### speaker call volume");
-                type = SOUND_TYPE_SPEAKER;
-                break;
-
-            case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO:
-            case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET:
-            case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
-                LOGD("### bluetooth call volume");
-                type = SOUND_TYPE_BTVOICE;
-                break;
-
-            case AudioSystem::DEVICE_OUT_WIRED_HEADSET:
-            case AudioSystem::DEVICE_OUT_WIRED_HEADPHONE: // Use receive path with 3 pole headset.
-                LOGD("### headset call volume");
-                type = SOUND_TYPE_HEADSET;
-                break;
-
-            default:
-                LOGW("### Call volume setting error!!!0x%08x \n", device);
-                type = SOUND_TYPE_VOICE;
-                break;
-        }
-        setCallVolume(mRilClient, type, int_volume);
+    uint32_t device = AudioSystem::DEVICE_OUT_EARPIECE;
+    if (mOutput != 0) {
+        device = mOutput->device();
     }
-*/
+    if (mMixer != NULL) {
+        struct mixer_ctl *ctl;
+        TRACE_DRIVER_IN(DRV_MIXER_GET)
+        if (device == AudioSystem::DEVICE_OUT_EARPIECE)
+            ctl= mixer_get_control(mMixer, "Output Volume - RCV", 0);
+        else
+            ctl= mixer_get_control(mMixer, "Output Volume - SPK/EAR", 0);
+        TRACE_DRIVER_OUT
+
+        if (ctl != NULL) {
+            const char* name = (device == AudioSystem::DEVICE_OUT_EARPIECE ? "Output Volume - RCV":"Output Volume - SPK/EAR");
+            LOGV("setVoiceVolume() set %s to %f", name, volume);
+            TRACE_DRIVER_IN(DRV_MIXER_SET)
+            mixer_ctl_set(ctl, volume * 100);
+            TRACE_DRIVER_OUT
+        }
+    }
+
     return NO_ERROR;
 }
 
@@ -486,6 +460,20 @@ status_t AudioHardware::setMasterVolume(float volume)
     // We return an error code here to let the audioflinger do in-software
     // volume on top of the maximum volume that we set through the SND API.
     // return error - software mixer will handle it
+
+    if (mMixer != NULL) {
+        LOGV("setMasterVolume() getting Output Volume - SPK/EAR control.");
+        TRACE_DRIVER_IN(DRV_MIXER_GET)
+        struct mixer_ctl *ctl= mixer_get_control(mMixer, "Output Volume - SPK/EAR", 0);
+        TRACE_DRIVER_OUT
+        if (ctl != NULL) {
+            LOGV("setMasterVolume() set Output Volume - SPK/EAR to %f", volume);
+            TRACE_DRIVER_IN(DRV_MIXER_SET)
+            mixer_ctl_set(ctl, volume * 100);
+            TRACE_DRIVER_OUT
+            return NO_ERROR;
+        }
+    }
     return -1;
 }
 
@@ -535,9 +523,6 @@ status_t AudioHardware::dump(int fd, const Vector<String16>& args)
     result.append(buffer);
     snprintf(buffer, SIZE, "\tInput source %s\n", mInputSource.string());
     result.append(buffer);
-    snprintf(buffer, SIZE, "\tCP %s\n",
-             (mActivatedCP) ? "Activated" : "Deactivated");
-    result.append(buffer);
     snprintf(buffer, SIZE, "\tmDriverOp: %d\n", mDriverOp);
     result.append(buffer);
 
@@ -563,67 +548,39 @@ status_t AudioHardware::setIncallPath_l(uint32_t device)
 {
     LOGV("setIncallPath_l: device %x", device);
 
-    // Setup sound path for CP clocking
-/*    if ((mSecRilLibHandle) &&
-        (connectRILDIfRequired() == OK)) {
-
-        if (mMode == AudioSystem::MODE_IN_CALL) {
-            LOGD("### incall mode route (%d)", device);
-            AudioPath path;
-            switch(device){
-                case AudioSystem::DEVICE_OUT_EARPIECE:
-                    LOGD("### incall mode earpiece route");
-                    path = SOUND_AUDIO_PATH_HANDSET;
-                    break;
-
-                case AudioSystem::DEVICE_OUT_SPEAKER:
-                    LOGD("### incall mode speaker route");
-                    path = SOUND_AUDIO_PATH_SPEAKER;
-                    break;
-
-                case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO:
-                case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET:
-                case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
-                    LOGD("### incall mode bluetooth route %s NR", mBluetoothNrec ? "" : "NO");
-                    if (mBluetoothNrec) {
-                        path = SOUND_AUDIO_PATH_BLUETOOTH;
-                    } else {
-                        path = SOUND_AUDIO_PATH_BLUETOOTH_NO_NR;
-                    }
-                    break;
-
-                case AudioSystem::DEVICE_OUT_WIRED_HEADPHONE :
-                    LOGD("### incall mode headphone route");
-                    path = SOUND_AUDIO_PATH_HEADPHONE;
-                    break;
-
-                case AudioSystem::DEVICE_OUT_WIRED_HEADSET :
-                    LOGD("### incall mode headset route");
-                    path = SOUND_AUDIO_PATH_HEADSET;
-                    break;
-
-                default:
-                    LOGW("### incall mode Error!! route = [%d]", device);
-                    path = SOUND_AUDIO_PATH_HANDSET;
-                    break;
-            }
-
-           setCallAudioPath(mRilClient, path);
-*/
-            if (mMixer != NULL) {
-                TRACE_DRIVER_IN(DRV_MIXER_GET)
-                struct mixer_ctl *ctl= mixer_get_control(mMixer, "Voice Call Path", 0);
-                TRACE_DRIVER_OUT
-                LOGE_IF(ctl == NULL, "setIncallPath_l() could not get mixer ctl");
-                if (ctl != NULL) {
-                    LOGV("setIncallPath_l() Voice Call Path, (%x)", device);
+    if (mMixer != NULL) {
+        TRACE_DRIVER_IN(DRV_MIXER_GET)
+        struct mixer_ctl *ctl= mixer_get_control(mMixer, "Voice Call Path", 0);
+        TRACE_DRIVER_OUT
+        LOGE_IF(ctl == NULL, "setIncallPath_l() could not get mixer ctl");
+        if (ctl != NULL) {
+            LOGV("setIncallPath_l() Voice Call Path, (%x)", device);
+            const char *router = getVoiceRouteFromDevice(device);
+            TRACE_DRIVER_IN(DRV_MIXER_SEL)
+            mixer_ctl_select(ctl,router);
+            TRACE_DRIVER_OUT
+            //trying to fix input router
+            if (router == (const char *)"SPK" || router == (const char *)"RCV") {
+                struct mixer_ctl *ctlMic = mixer_get_control(mMixer, "MIC Path", 0);
+                if (ctlMic != NULL ) {
+                    // First set Mic Path to suitable path
                     TRACE_DRIVER_IN(DRV_MIXER_SEL)
-                    mixer_ctl_select(ctl, getVoiceRouteFromDevice(device));
+                    mixer_ctl_select(ctlMic , getMicPathFromDevice());
                     TRACE_DRIVER_OUT
                 }
+                //TODO: if possible, we should set each  MIC Path's gain.
+                if (router == (const char *)"SPK") {
+                    ctlMic = mixer_get_control(mMixer, "MIC Gain", 0);
+                    if (ctlMic != NULL ) {
+                        // Second set mic gain to default (33, means index value 5)
+                        TRACE_DRIVER_IN(DRV_MIXER_SET)
+                        mixer_ctl_set(ctlMic , 33);
+                        TRACE_DRIVER_OUT
+                    }
+                }
             }
-//        }
-//    }
+        }
+    }
     return NO_ERROR;
 }
 
@@ -715,24 +672,19 @@ const char *AudioHardware::getOutputRouteFromDevice(uint32_t device)
     case AudioSystem::DEVICE_OUT_EARPIECE:
         return "RCV";
     case AudioSystem::DEVICE_OUT_SPEAKER:
-        if (mMode == AudioSystem::MODE_RINGTONE) return "RING_SPK";
-        else return "SPK";
+        return "SPK";
     case AudioSystem::DEVICE_OUT_WIRED_HEADPHONE:
-        if (mMode == AudioSystem::MODE_RINGTONE) return "RING_NO_MIC";
-        else return "HP_NO_MIC";
     case AudioSystem::DEVICE_OUT_WIRED_HEADSET:
-        if (mMode == AudioSystem::MODE_RINGTONE) return "RING_HP";
-        else return "HP";
+        return "HP";
     case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_WIRED_HEADPHONE):
     case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_WIRED_HEADSET):
-        if (mMode == AudioSystem::MODE_RINGTONE) return "RING_SPK_HP";
-        else return "SPK_HP";
+        return "SPK_HP";
     case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO:
     case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET:
     case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
         return "BT";
     default:
-        return "OFF";
+        return "Off";
     }
 }
 
@@ -742,9 +694,9 @@ const char *AudioHardware::getVoiceRouteFromDevice(uint32_t device)
     case AudioSystem::DEVICE_OUT_EARPIECE:
         return "RCV";
     case AudioSystem::DEVICE_OUT_SPEAKER:
+    case (AudioSystem::DEVICE_OUT_EARPIECE|AudioSystem::DEVICE_OUT_SPEAKER):
         return "SPK";
     case AudioSystem::DEVICE_OUT_WIRED_HEADPHONE:
-        return "HP_NO_MIC";
     case AudioSystem::DEVICE_OUT_WIRED_HEADSET:
         return "HP";
     case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO:
@@ -752,26 +704,38 @@ const char *AudioHardware::getVoiceRouteFromDevice(uint32_t device)
     case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
         return "BT";
     default:
-        return "OFF";
+        return "Off";
     }
 }
 
 const char *AudioHardware::getInputRouteFromDevice(uint32_t device)
 {
     if (mMicMute) {
-        return "MIC OFF";
+        return "Off";
     }
 
     switch (device) {
-    case AudioSystem::DEVICE_IN_BUILTIN_MIC:
-        return "Main Mic";
-    case AudioSystem::DEVICE_IN_WIRED_HEADSET:
-        return "Hands Free Mic";
-    case AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET:
-        return "BT Sco Mic";
-    default:
-        return "MIC OFF";
+        case AudioSystem::DEVICE_IN_BUILTIN_MIC:
+            return "MAIN";
+        case AudioSystem::DEVICE_IN_WIRED_HEADSET:
+            return "EAR";
+        case AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET:
+            return "BT";
+        default:
+            return "Off";
     }
+}
+
+const char *AudioHardware::getMicPathFromDevice()
+{
+    uint32_t device = mOutput->device();
+    if (AudioSystem::DEVICE_OUT_SPEAKER & device)
+        return "Sub Mic";
+    else if (AudioSystem::DEVICE_OUT_EARPIECE & device)
+        return "Main Mic";
+    else
+        return "Sub Mic";
+
 }
 
 uint32_t AudioHardware::getInputSampleRate(uint32_t sampleRate)
@@ -804,31 +768,6 @@ sp <AudioHardware::AudioStreamInALSA> AudioHardware::getActiveInput_l()
 
     return spIn;
 }
-
-status_t AudioHardware::setInputSource_l(String8 source)
-{
-     LOGV("setInputSource_l(%s)", source.string());
-     if (source != mInputSource) {
-         if ((source == "Default") || (mMode != AudioSystem::MODE_IN_CALL)) {
-             if (mMixer) {
-                 TRACE_DRIVER_IN(DRV_MIXER_GET)
-                 struct mixer_ctl *ctl= mixer_get_control(mMixer, "Input Source", 0);
-                 TRACE_DRIVER_OUT
-                 if (ctl == NULL) {
-                     return NO_INIT;
-                 }
-                 LOGV("mixer_ctl_select, Input Source, (%s)", source.string());
-                 TRACE_DRIVER_IN(DRV_MIXER_SEL)
-                 mixer_ctl_select(ctl, source.string());
-                 TRACE_DRIVER_OUT
-             }
-         }
-         mInputSource = source;
-     }
-
-     return NO_ERROR;
-}
-
 
 //------------------------------------------------------------------------------
 //  AudioStreamOutALSA
@@ -900,7 +839,7 @@ ssize_t AudioHardware::AudioStreamOutALSA::write(const void* buffer, size_t byte
         if (mStandby) {
             AutoMutex hwLock(mHardware->lock());
 
-            LOGD("AudioHardware pcm playback is exiting standby.");
+            LOGD("AudioStreamOutALSA::write: AudioHardware pcm playback is exiting standby.");
             acquire_wake_lock (PARTIAL_WAKE_LOCK, "AudioOutLock");
 
             sp<AudioStreamInALSA> spIn = mHardware->getActiveInput_l();
@@ -991,6 +930,12 @@ void AudioHardware::AudioStreamOutALSA::doStandby_l()
 void AudioHardware::AudioStreamOutALSA::close_l()
 {
     if (mMixer) {
+
+        mRouteCtl = mixer_get_control(mMixer, "Idle Mode", 0);
+        LOGE_IF(mRouteCtl == NULL, "close_l() could not get mixer ctl");
+        if (mRouteCtl != NULL) 
+            mixer_ctl_select(mRouteCtl, "ON");
+
         mHardware->closeMixer_l();
         mMixer = NULL;
         mRouteCtl = NULL;
@@ -1012,6 +957,12 @@ status_t AudioHardware::AudioStreamOutALSA::open_l()
     mMixer = mHardware->openMixer_l();
     if (mMixer) {
         LOGV("open playback normal");
+
+        mRouteCtl = mixer_get_control(mMixer, "Idle Mode", 0);
+        LOGE_IF(mRouteCtl == NULL, "open_l() could not get mixer ctl");
+        if (mRouteCtl != NULL) 
+            mixer_ctl_select(mRouteCtl, "Off");
+
         TRACE_DRIVER_IN(DRV_MIXER_GET)
         mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
         TRACE_DRIVER_OUT
@@ -1294,7 +1245,6 @@ ssize_t AudioHardware::AudioStreamInALSA::read(void* buffer, ssize_t bytes)
 Error:
 
     standby();
-
     // Simulate audio output timing in case of error
     usleep((((bytes * 1000) / frameSize()) * 1000) / sampleRate());
 
@@ -1330,6 +1280,12 @@ void AudioHardware::AudioStreamInALSA::doStandby_l()
 void AudioHardware::AudioStreamInALSA::close_l()
 {
     if (mMixer) {
+
+        mRouteCtl = mixer_get_control(mMixer, "Idle Mode", 0);
+        LOGE_IF(mRouteCtl == NULL, "open_l() could not get mixer ctl");
+        if (mRouteCtl != NULL) 
+            mixer_ctl_select(mRouteCtl, "ON");
+
         mHardware->closeMixer_l();
         mMixer = NULL;
         mRouteCtl = NULL;
@@ -1373,19 +1329,34 @@ status_t AudioHardware::AudioStreamInALSA::open_l()
 
     mMixer = mHardware->openMixer_l();
     if (mMixer) {
+
+        mRouteCtl = mixer_get_control(mMixer, "Idle Mode", 0);
+        LOGE_IF(mRouteCtl == NULL, "open_l() could not get mixer ctl");
+        if (mRouteCtl != NULL) 
+            mixer_ctl_select(mRouteCtl, "Off");
+
         TRACE_DRIVER_IN(DRV_MIXER_GET)
-        mRouteCtl = mixer_get_control(mMixer, "Capture MIC Path", 0);
+        mRouteCtl = mixer_get_control(mMixer, "Voice Memo Path", 0);
         TRACE_DRIVER_OUT
     }
 
-    if (mHardware->mode() != AudioSystem::MODE_IN_CALL) {
-        const char *route = mHardware->getInputRouteFromDevice(mDevices);
-        LOGV("read() wakeup setting route %s", route);
-        if (mRouteCtl) {
+    if (mHardware->mode() == AudioSystem::MODE_IN_CALL) {
+     
+        struct mixer_ctl *ctlMic = mixer_get_control(mMixer, "MIC Path", 0);
+        if (ctlMic != NULL ) {
+            // set proper Mic Path router when in call.
             TRACE_DRIVER_IN(DRV_MIXER_SEL)
-            mixer_ctl_select(mRouteCtl, route);
+            mixer_ctl_select(ctlMic , mHardware->getMicPathFromDevice());
             TRACE_DRIVER_OUT
         }
+    }
+    
+    const char *route = mHardware->getInputRouteFromDevice(mDevices);
+    LOGV("read() wakeup setting route %s", route);
+    if (mRouteCtl) {
+        TRACE_DRIVER_IN(DRV_MIXER_SEL)
+        mixer_ctl_select(mRouteCtl, route);
+        TRACE_DRIVER_OUT
     }
 
     return NO_ERROR;
@@ -1437,7 +1408,6 @@ status_t AudioHardware::AudioStreamInALSA::setParameters(const String8& keyValue
     AudioParameter param = AudioParameter(keyValuePairs);
     status_t status = NO_ERROR;
     int value;
-    String8 source;
 
     LOGD("AudioStreamInALSA::setParameters() %s", keyValuePairs.string());
 
@@ -1445,17 +1415,6 @@ status_t AudioHardware::AudioStreamInALSA::setParameters(const String8& keyValue
 
     {
         AutoMutex lock(mLock);
-
-        if (param.get(String8(INPUT_SOURCE_KEY), source) == NO_ERROR) {
-            AutoMutex hwLock(mHardware->lock());
-
-            mHardware->openMixer_l();
-            mHardware->setInputSource_l(source);
-            mHardware->closeMixer_l();
-
-            param.remove(String8(INPUT_SOURCE_KEY));
-        }
-
         if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR)
         {
             if (value != 0) {
