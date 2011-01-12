@@ -1,6 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 
-ifneq ($(strip $(BOARD_USES_ALSA_AUDIO)),true)
+#ifeq ($(TARGET_DEVICE),spica)
 
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= aplay.c alsa_pcm.c alsa_mixer.c
@@ -50,4 +50,4 @@ ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 endif
 include $(BUILD_SHARED_LIBRARY)
 
-endif
+#endif

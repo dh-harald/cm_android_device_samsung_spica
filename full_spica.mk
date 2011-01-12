@@ -48,22 +48,10 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/wifi/wlservice:system/bin/wlservice
 
 #
-# Display (2D)
-#
-PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/gralloc-libs/libs3c2drender.so:system/lib/libs3c2drender.so \
-    device/samsung/spica/prebuilt/spica/gralloc-libs/libsavscmn.so:system/lib/libsavscmn.so \
-    device/samsung/spica/prebuilt/spica/gralloc-libs/hw/gralloc.GT-I5700.so:system/lib/hw/gralloc.GT-I5700.so
-
-#
 # Display (3D)
 #
 PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/fimg-libs/egl.cfg:system/lib/egl/egl.cfg \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libChunkAlloc.so:system/lib/egl/libChunkAlloc.so \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libEGL_fimg.so:system/lib/egl/libEGL_fimg.so \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libGLESv1_CM_fimg.so:system/lib/egl/libGLESv1_CM_fimg.so \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libGLESv2_fimg.so:system/lib/egl/libGLESv2_fimg.so
+    device/samsung/spica/prebuilt/spica/fimg-libs/egl.cfg:system/lib/egl/egl.cfg
 
 #
 # Keys
@@ -72,12 +60,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/keys/s3c-keypad-rev0020.kl:system/usr/keylayout/s3c-keypad-rev0020.kl \
     device/samsung/spica/prebuilt/spica/keys/sec_headset.kl:system/usr/keylayout/sec_headset.kl \
     device/samsung/spica/prebuilt/spica/keys/s3c-keypad-rev0020.kcm.bin:system/usr/keychars/s3c-keypad-rev0020.kcm.bin
-
-#
-# Only one left: copybit
-#
-PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/hw/copybit.GT-I5700.so:system/lib/hw/copybit.GT-I5700.so
 
 #
 # Vold
@@ -92,8 +74,8 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/ril/drexe:system/bin/drexe \
     device/samsung/spica/prebuilt/spica/ril/efsd:system/bin/efsd \
     device/samsung/spica/prebuilt/spica/ril/rilclient-test:system/bin/rilclient-test \
-    device/samsung/spica/prebuilt/spica/ril/libsec-ril.so:system/lib/libsec-ril.so
-#    device/samsung/spica/prebuilt/spica/ril/libsecril-client.so:system/lib/libsecril-client.so
+    device/samsung/spica/prebuilt/spica/ril/libsec-ril.so:system/lib/libsec-ril.so \
+    device/samsung/spica/prebuilt/spica/ril/rild:system/bin/rild
 
 #
 # GSM APN list
