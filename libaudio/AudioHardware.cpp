@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 
 #define LOG_TAG "AudioHardware"
 
@@ -44,7 +44,7 @@ extern "C" {
 namespace android {
 
 const uint32_t AudioHardware::inputSamplingRates[] = {
-        8000, 11025, 16000, 22050, 44100, 48000
+        8000, 11025, 16000, 22050, 44100
 };
 
 //  trace driver operations for dump
@@ -460,7 +460,7 @@ status_t AudioHardware::setMasterVolume(float volume)
     // We return an error code here to let the audioflinger do in-software
     // volume on top of the maximum volume that we set through the SND API.
     // return error - software mixer will handle it
-
+    openMixer_l();
     if (mMixer != NULL) {
         LOGV("setMasterVolume() getting Output Volume - SPK/EAR control.");
         TRACE_DRIVER_IN(DRV_MIXER_GET)
@@ -474,6 +474,7 @@ status_t AudioHardware::setMasterVolume(float volume)
             return NO_ERROR;
         }
     }
+    closeMixer_l();
     return -1;
 }
 
@@ -675,6 +676,9 @@ const char *AudioHardware::getOutputRouteFromDevice(uint32_t device)
         return "SPK";
     case AudioSystem::DEVICE_OUT_WIRED_HEADPHONE:
     case AudioSystem::DEVICE_OUT_WIRED_HEADSET:
+#ifdef HAVE_FM_RADIO
+    case AudioSystem::DEVICE_OUT_FM:
+#endif
         return "HP";
     case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_WIRED_HEADPHONE):
     case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_WIRED_HEADSET):
@@ -768,7 +772,34 @@ sp <AudioHardware::AudioStreamInALSA> AudioHardware::getActiveInput_l()
 
     return spIn;
 }
+#ifdef HAVE_FM_RADIO
+static status_t set_volume_fm(uint32_t volume)
+{
+    int returnval = 0;
+    float ratio = 2.5;
+    char s1[100] = "hcitool cmd 0x3f 0xa 0x5 0xc0 0x41 0xf 0 0x20 0 0 0";
+    char s2[100] = "hcitool cmd 0x3f 0xa 0x5 0xe4 0x41 0xf 0 0x00 0 0 0";
+    char s3[100] = "hcitool cmd 0x3f 0xa 0x5 0xe0 0x41 0xf 0 ";
+    char stemp[10] = "";
+    char *pstarget = s3;
+    volume = (unsigned int)(volume * ratio);
+    sprintf(stemp, "0x%x ", volume);
+    pstarget = strcat(s3, stemp);
+    pstarget = strcat(s3, "0 0 0");
+    system(s1);
+    system(s2);
+    system(s3);
+    return returnval;
+}
 
+status_t AudioHardware::setFmVolume(float v)
+{
+    int vol = AudioSystem::logToLinear(v);
+    LOGD("setFmVolume %d", vol);
+    set_volume_fm(vol);
+    return NO_ERROR;
+}
+#endif
 //------------------------------------------------------------------------------
 //  AudioStreamOutALSA
 //------------------------------------------------------------------------------
@@ -1044,12 +1075,43 @@ status_t AudioHardware::AudioStreamOutALSA::setParameters(const String8& keyValu
                 if (mHardware->mode() != AudioSystem::MODE_IN_CALL) {
                     doStandby_l();
                 }
+#ifdef HAVE_FM_RADIO
+
+                if((device & AudioSystem::DEVICE_OUT_FM) && mFmOn == false){
+                    mFmOn = true;
+                } else if (mFmOn == true && !(device & AudioSystem::DEVICE_OUT_FM)){
+                    mFmOn = false;
+                }
+#endif
             }
             if (mHardware->mode() == AudioSystem::MODE_IN_CALL) {
                 mHardware->setIncallPath_l(device);
             }
             param.remove(String8(AudioParameter::keyRouting));
         }
+#ifdef HAVE_FM_RADIO
+    mMixer = mHardware->openMixer_l();
+    if (param.getInt(String8(AudioParameter::keyFmOn), device) == NO_ERROR) {
+        if (mMixer) {
+            mRouteCtl = mixer_get_control(mMixer, "FM Radio Path", 0);
+            if (mRouteCtl != NULL) {
+                mixer_ctl_select(mRouteCtl, "HP");
+            }
+        }
+        param.remove(String8(AudioParameter::keyFmOn));
+        mFmOn = true;
+    }
+
+    if (param.getInt(String8(AudioParameter::keyFmOff), device) == NO_ERROR) {
+        if (mMixer) {
+            mRouteCtl = mixer_get_control(mMixer, "FM Radio Path", 0);
+            if (mRouteCtl != NULL) 
+                mixer_ctl_select(mRouteCtl, "Off");
+        }
+        param.remove(String8(AudioParameter::keyFmOff));
+        mFmOn = false;
+    }
+#endif
     }
 
     if (param.size()) {

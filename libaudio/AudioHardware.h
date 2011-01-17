@@ -25,7 +25,6 @@
 
 #include <hardware_legacy/AudioHardwareBase.h>
 
-//#include "secril-client.h"
 
 extern "C" {
     struct pcm;
@@ -67,7 +66,6 @@ namespace android {
 #define AUDIO_HW_IN_PERIOD_BYTES ((AUDIO_HW_IN_PERIOD_SZ*sizeof(int16_t))/8)
 
 //#define INPUT_SOURCE_KEY "Input Source"
-//#define VIOCE_MEMO_PATH_KEY "Voice Memo Path"
 
 class AudioHardware : public AudioHardwareBase
 {
@@ -113,6 +111,9 @@ public:
 
             status_t setIncallPath_l(uint32_t device);
             status_t setVoiceMemoPath_l(String8 path);
+#ifdef HAVE_FM_RADIO
+            status_t setFmVolume(float v);
+#endif
 
 //            status_t setInputSource_l(String8 source);
 
@@ -147,21 +148,7 @@ private:
 
     String8         mInputSource;
     bool            mBluetoothNrec;
-/*
-    void*           mSecRilLibHandle;
-    HRilClient      mRilClient;
-    bool            mActivatedCP;
-    HRilClient      (*openClientRILD)  (void);
-    int             (*disconnectRILD)  (HRilClient);
-    int             (*closeClientRILD) (HRilClient);
-    int             (*isConnectedRILD) (HRilClient);
-    int             (*connectRILD)     (HRilClient);
-    int             (*setCallVolume)   (HRilClient, SoundType, int);
-    int             (*setCallAudioPath)(HRilClient, AudioPath);
-    int             (*setCallClockSync)(HRilClient, SoundClockCondition);
-    void            loadRILD(void);
-    status_t        connectRILDIfRequired(void);
-*/
+
     //  trace driver operations for dump
     int             mDriverOp;
 
@@ -226,6 +213,10 @@ private:
         //  trace driver operations for dump
         int mDriverOp;
         int mStandbyCnt;
+
+#ifdef HAVE_FM_RADIO
+        bool mFmOn;
+#endif
     };
 
     class DownSampler;
