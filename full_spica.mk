@@ -11,8 +11,12 @@ DEVICE_PACKAGE_OVERLAYS += device/samsung/spica/overlay
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=160
 
+#
+# GPS config & application from sucka
+#
 PRODUCT_COPY_FILES += \
-        device/common/gps/gps.conf_EU_SUPL:system/etc/gps.conf
+    device/samsung/spica/prebuilt/spica/gps/gps.conf:system/etc/gps.conf \
+    device/samsung/spica/prebuilt/spica/gps/LBSModeApp.apk:system/app/LBSModeApp.apk
 
 # Install the features available on this device.
 PRODUCT_COPY_FILES += \
