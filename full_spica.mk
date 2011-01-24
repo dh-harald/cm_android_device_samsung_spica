@@ -85,6 +85,12 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/hw/copybit.GT-I5700.so:system/lib/hw/copybit.GT-I5700.so
 
 #
+# akm daemon
+#
+PRODUCT_COPY_FILES += \
+    device/samsung/spica/prebuilt/spica/akmd/akmd:system/bin/akmd
+
+#
 # Vold
 #
 PRODUCT_COPY_FILES += \
