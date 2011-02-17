@@ -60,7 +60,6 @@ PRODUCT_PACKAGES += \
 
 # Packages in device dir
 PRODUCT_PACKAGES += \
-    akmd \
     libs3cjpeg.so \
     libcamera.so \
     copybit.GT-I5700 \
@@ -69,7 +68,9 @@ PRODUCT_PACKAGES += \
     lights.GT-I5700 \
     sensors.GT-I5700 \
     libsecgps.so \
-    libsecril-client.so
+    libsecril-client.so \
+    libGLES_fimg \
+    libfimg
 
 # Publish that we support the live wallpaper feature.
 PRODUCT_COPY_FILES += \
