@@ -57,6 +57,8 @@ BOARD_HAS_LIMITED_EGL := true
 
 TARGET_USES_OLD_LIBSENSORS_HAL := true
 
+TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/s3c6410-usbgadget/gadget/lun"
+
 BOARD_USES_GENERIC_AUDIO := false
 BOARD_USES_LIBSECRIL_STUB := true
 
