@@ -38,7 +38,8 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/wifi/libwlmlogger.so:system/lib/libwlmlogger.so \
     device/samsung/spica/prebuilt/spica/wifi/libwlservice.so:system/lib/libwlservice.so \
     device/samsung/spica/prebuilt/spica/wifi/nvram.txt:system/etc/nvram.txt \
-    device/samsung/spica/prebuilt/spica/wifi/rtecdc.bin:system/etc/rtecdc.bin \
+    device/samsung/spica/prebuilt/acclaim/wifi/rtecdc.bin:system/etc/rtecdc.bin \
+    device/samsung/spica/prebuilt/acclaim/wifi/rtecdc_apsta.bin:system/etc/rtecdc_apsta.bin \
     device/samsung/spica/prebuilt/spica/wifi/nvram_mfg.txt:system/etc/nvram_mfg.txt \
     device/samsung/spica/prebuilt/spica/wifi/rtecdc_mfg.bin:system/etc/rtecdc_mfg.bin \
     device/samsung/spica/prebuilt/spica/wifi/bcm_supp.conf:system/etc/bcm_supp.conf \
