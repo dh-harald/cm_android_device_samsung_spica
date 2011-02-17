@@ -32,6 +32,12 @@ PRODUCT_COPY_FILES += \
 #
 
 #
+# AKMD
+#
+PRODUCT_COPY_FILES += \
+    device/samsung/spica/prebuilt/spica/akmd/akmd:system/bin/akmd
+
+#
 # Wifi
 #
 PRODUCT_COPY_FILES += \
