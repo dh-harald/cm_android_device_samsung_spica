@@ -81,7 +81,8 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/spica/ril/drexe:system/bin/drexe \
     device/samsung/spica/prebuilt/spica/ril/efsd:system/bin/efsd \
     device/samsung/spica/prebuilt/spica/ril/rilclient-test:system/bin/rilclient-test \
-    device/samsung/spica/prebuilt/spica/ril/libsec-ril.so:system/lib/libsec-ril.so
+    device/samsung/spica/prebuilt/spica/ril/libsec-ril.so:system/lib/libsec-ril.so \
+    device/samsung/spica/prebuilt/spica/ril/rild:system/bin/rild
 
 #
 # GSM APN list
