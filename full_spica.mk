@@ -31,6 +31,20 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/spica/media_profiles.xml:system/etc/media_profiles.xml
 
+# T-Mobile theme engine
+PRODUCT_PACKAGES += \
+       ThemeManager \
+       ThemeChooser \
+       com.tmobile.themes
+
+PRODUCT_COPY_FILES += \
+       vendor/cyanogen/prebuilt/common/etc/permissions/com.tmobile.software.themes.xml:system/etc/permissions/com.tmobile.software.themes.xml
+
+# Theme packages
+PRODUCT_PACKAGES += \
+       Androidian \
+       Cyanbread
+
 #
 # Copy spica specific prebuilt files
 #
