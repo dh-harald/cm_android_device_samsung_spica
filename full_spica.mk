@@ -23,6 +23,10 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     frameworks/base/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml 
 
+# Enable SIP+VoIP on all targets
+PRODUCT_COPY_FILES += \
+    frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml
+
 # media config xml file
 PRODUCT_COPY_FILES += \
     device/samsung/spica/media_profiles.xml:system/etc/media_profiles.xml
