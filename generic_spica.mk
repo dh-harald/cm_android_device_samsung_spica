@@ -39,6 +39,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
 wifi.supplicant_scan_interval=90
 
+# OpenVPN
+PRODUCT_PACKAGES += \
+    openvpn
+
 PRODUCT_PACKAGES += \
     ADWLauncher \
     CMParts \
