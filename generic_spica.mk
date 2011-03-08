@@ -39,6 +39,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
 wifi.supplicant_scan_interval=90
 
+# Repeat ring tone on incoming calls (CM/Blade)
+PRODUCT_PROPERTY_OVERRIDES += \
+ro.telephony.call_ring.multiple=false
+
 # OpenVPN
 PRODUCT_PACKAGES += \
     openvpn
