@@ -126,8 +126,8 @@ ifdef SPICA_WITH_GOOGLE
 	vendor/spica/proprietary/HtcCopyright.apk:system/app/HtcCopyright.apk \
 	vendor/spica/proprietary/HtcEmailPolicy.apk:system/app/HtcEmailPolicy.apk \
 	vendor/spica/proprietary/HtcSettings.apk:system/app/HtcSettings.apk \
-	vendor/spica/proprietary/kickback.apk:system/app/kickback.apk \
 	vendor/spica/proprietary/LatinImeTutorial.apk:system/app/LatinImeTutorial.apk \
+	vendor/spica/proprietary/libinterstitial.so:system/lib/libinterstitial.so \
 	vendor/spica/proprietary/libspeech.so:system/lib/libspeech.so \
 	vendor/spica/proprietary/libvoicesearch.so:system/lib/libvoicesearch.so \
 	vendor/spica/proprietary/Maps.apk:system/app/Maps.apk \
@@ -135,12 +135,8 @@ ifdef SPICA_WITH_GOOGLE
 	vendor/spica/proprietary/MediaUploader.apk:system/app/MediaUploader.apk \
 	vendor/spica/proprietary/NetworkLocation.apk:system/app/NetworkLocation.apk \
 	vendor/spica/proprietary/OneTimeInitializer.apk:system/app/OneTimeInitializer.apk \
-	vendor/spica/proprietary/PassionQuickOffice.apk:system/app/PassionQuickOffice.apk \
 	vendor/spica/proprietary/SetupWizard.apk:system/app/SetupWizard.apk \
-	vendor/spica/proprietary/soundback.apk:system/app/soundback.apk \
-	vendor/spica/proprietary/Street.apk:system/app/Street.apk \
 	vendor/spica/proprietary/Talk.apk:system/app/Talk.apk \
-	vendor/spica/proprietary/talkback.apk:system/app/talkback.apk \
 	vendor/spica/proprietary/Twitter.apk:system/app/Twitter.apk \
 	vendor/spica/proprietary/Vending.apk:system/app/Vending.apk \
 	vendor/spica/proprietary/VoiceSearch.apk:system/app/VoiceSearch.apk \
