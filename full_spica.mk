@@ -9,7 +9,9 @@ DEVICE_PACKAGE_OVERLAYS += device/samsung/spica/overlay
 # density in DPI of the LCD of this board. This is used to scale the UI
 # appropriately. If this property is not defined, the default value is 160 dpi. 
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.sf.lcd_density=160
+    media.stagefright.enable-http=false \
+    ro.sf.lcd_density=160 \
+    ro.opengles.version=131072
 
 #
 # GPS config & application from sucka
@@ -56,19 +58,18 @@ PRODUCT_COPY_FILES += \
 # Display (2D)
 #
 PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/gralloc-libs/libs3c2drender.so:system/lib/libs3c2drender.so \
-    device/samsung/spica/prebuilt/spica/gralloc-libs/libsavscmn.so:system/lib/libsavscmn.so \
-    device/samsung/spica/prebuilt/spica/gralloc-libs/hw/gralloc.GT-I5700.so:system/lib/hw/gralloc.GT-I5700.so
+    device/samsung/spica/prebuilt/intercept/gralloc-libs/libs3c2drender.so:system/lib/libs3c2drender.so \
+    device/samsung/spica/prebuilt/intercept/gralloc-libs/hw/gralloc.GT-I5700.so:system/lib/hw/gralloc.GT-I5700.so
 
 #
 # Display (3D)
 #
 PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/fimg-libs/egl.cfg:system/lib/egl/egl.cfg \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libChunkAlloc.so:system/lib/egl/libChunkAlloc.so \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libEGL_fimg.so:system/lib/egl/libEGL_fimg.so \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libGLESv1_CM_fimg.so:system/lib/egl/libGLESv1_CM_fimg.so \
-    device/samsung/spica/prebuilt/spica/fimg-libs/libGLESv2_fimg.so:system/lib/egl/libGLESv2_fimg.so
+    device/samsung/spica/prebuilt/intercept/fimg-libs/egl.cfg:system/lib/egl/egl.cfg \
+    device/samsung/spica/prebuilt/intercept/fimg-libs/libChunkAlloc.so:system/lib/egl/libChunkAlloc.so \
+    device/samsung/spica/prebuilt/intercept/fimg-libs/libEGL_fimg.so:system/lib/egl/libEGL_fimg.so \
+    device/samsung/spica/prebuilt/intercept/fimg-libs/libGLESv1_CM_fimg.so:system/lib/egl/libGLESv1_CM_fimg.so \
+    device/samsung/spica/prebuilt/intercept/fimg-libs/libGLESv2_fimg.so:system/lib/egl/libGLESv2_fimg.so
 
 #
 # Keys
@@ -82,7 +83,7 @@ PRODUCT_COPY_FILES += \
 # Only one left: copybit
 #
 PRODUCT_COPY_FILES += \
-    device/samsung/spica/prebuilt/spica/hw/copybit.GT-I5700.so:system/lib/hw/copybit.GT-I5700.so
+    device/samsung/spica/prebuilt/intercept/hw/copybit.GT-I5700.so:system/lib/hw/copybit.GT-I5700.so
 
 #
 # akm daemon
