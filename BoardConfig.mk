@@ -53,6 +53,7 @@ BOARD_USE_FROYO_LIBCAMERA := true
 BOARD_CAMERA_USE_GETBUFFERINFO := true
 
 TARGET_USES_OLD_LIBSENSORS_HAL := true
+TARGET_SENSORS_NO_OPEN_CHECK := true
 
 TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/s3c6410-usbgadget/gadget/lun"
 # use pre-kernel.35 vold usb mounting
