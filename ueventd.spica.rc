@@ -1,0 +1,31 @@
+# for video
+/dev/video0               0660   system     camera
+/dev/video1               0660   system     camera
+/dev/video2               0660   system     camera
+/dev/s3c-jpg              0660   system     camera
+/dev/s3c-mem              0660   system     system
+/dev/s3c-mfc              0660   system     graphics
+/dev/s3c-g2d              0666   system     graphics
+/dev/s3c-g3d              0666   system     graphics
+/dev/pmem_gpu1            0666   system     graphics
+
+# for GSM radio
+/dev/dpram                0660   radio      radio
+/dev/dpramerr             0660   radio      radio
+/dev/multipdp             0660   radio      radio
+/dev/block/bml10          0660   radio      radio
+/dev/ttySAC0              0660   radio      radio
+/dev/ttyCSD0              0660   radio      radio
+/dev/ttySMD0              0660   radio      radio
+/dev/ttyEFS0              0660   radio      radio
+
+# for GPS
+/dev/ttyGPS0              0666   gps        gps
+/dev/ttyXTRA0             0666   gps        gps
+
+# for Sensor HAL
+/dev/akm8973              0660   system     system
+/dev/accelerometer        0660   system     system
+
+# for Bluetooth
+/dev/ttySAC1              0600   bluetooth  bluetooth
