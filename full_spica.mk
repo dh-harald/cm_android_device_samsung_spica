@@ -28,5 +28,5 @@ $(call inherit-product, device/samsung/spica/spica.mk)
 # Discard inherited values and use our own instead.
 PRODUCT_NAME := full_spica
 PRODUCT_DEVICE := spica
-PRODUCT_BRAND := Android
-PRODUCT_MODEL := Full Android on Spica
+PRODUCT_BRAND := Samsung
+PRODUCT_MODEL := Galaxy Spica
