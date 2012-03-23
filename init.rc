@@ -39,7 +39,6 @@ loglevel 3
 
     mkdir /system
     mkdir /data 0771 system system
-    mkdir /cache 0770 system cache
     mkdir /config 0500 root root
 
     # Directory for putting things only root should see.
@@ -94,12 +93,15 @@ loglevel 3
     chmod 0644 /proc/net/xt_qtaguid/ctrl
 
 on fs
+# attach ubi devices
+    ubiattach mtd@system 0
+    ubiattach mtd@data 1
+    ubiattach mtd@cache 2
+    ubiattach mtd@efs 3
+
 # mount mtd partitions
     # Mount /system rw first to give the filesystem a chance to save a checkpoint
-    mount ext4 /dev/block/mmcblk0p2 /system
-    mount ext4 /dev/block/mmcblk0p2 /system ro remount
-    mount ext4 /dev/block/mmcblk0p3 /data nosuid nodev
-    mount ext4 /dev/block/mmcblk0p4 /cache nosuid nodev
+    mount ubifs /dev/ubi0_0 /system
 
 on post-fs
     # once everything is setup, no need to modify /
@@ -108,10 +110,6 @@ on post-fs
     # We chown/chmod /cache again so because mount is run as root + defaults
     chown system cache /cache
     chmod 0770 /cache
-
-    # This may have been created by the recovery system with odd permissions
-    chown system cache /cache/recovery
-    chmod 0770 /cache/recovery
 
     #change permissions on vmallocinfo so we can grab it from bugreports
     chown root log /proc/vmallocinfo
@@ -135,6 +133,17 @@ on post-fs-data
     # Do this before we mount cache so eventually we can use cache for
     # storing dumps on platforms which do not have a dedicated dump partition.
     mkdir /data/dontpanic 0750 root log
+
+    mkdir /data/cache
+    chown system cache /data/cache
+    chmod 0771 /data/cache
+    symlink /data/cache /cache
+    chown system cache /cache
+    chmod 0771 /cache
+
+    # This may have been created by the recovery system with odd permissions
+    chown system cache /cache/recovery
+    chmod 0770 /cache/recovery
 
     # Collect apanic data, free resources and re-arm trigger
     copy /proc/apanic_console /data/dontpanic/apanic_console

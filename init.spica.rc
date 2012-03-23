@@ -26,9 +26,17 @@ on boot
     setprop ro.radio.use-ppp no
 
 on fs
+    # Remount /system read-only, because it was mounted rw first (see: init.rc)
+    mount ubifs /dev/ubi0_0 /system ro remount
+
+    # /data
+    mount ubifs /dev/ubi1_0 /data rw
+
+# Show boot logo as early as possible
+    exec /system/bin/show_logo
+
 # Mount /efs
     mkdir /efs 0775 radio radio
-    ubiattach mtd@efs 3
     mount ubifs /dev/ubi3_0 /efs rw sync
     chown radio radio /efs
     chmod 775 /efs
