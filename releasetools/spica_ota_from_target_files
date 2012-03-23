@@ -78,7 +78,7 @@ def WriteFullOTAPackage(input_zip, output_zip):
   script.Mount("/system")
   script.UnpackPackageDir("system", "/system")
 
-  symlinks = CopySystemFiles(input_zip, output_zip)
+  (symlinks, retouch_files) = CopySystemFiles(input_zip, output_zip)
   script.MakeSymlinks(symlinks)
 
   Item.GetMetadata(input_zip)
@@ -90,9 +90,10 @@ def WriteFullOTAPackage(input_zip, output_zip):
     script.ShowProgress(0.2, 10)
     script.RunBackup("restore")
 
-  script.RunModelidCfg()
+  if OPTIONS.modelidcfg:
+    script.RunConfig("")
 
-  script.RunVerifyCachePartitionSize()
+#  script.RunVerifyCachePartitionSize()
 
   CopyBootFiles(input_zip, output_zip)
 
