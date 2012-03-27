@@ -67,6 +67,7 @@ PRODUCT_COPY_FILES += \
 # Prebuilt RIL files
 PRODUCT_COPY_FILES += \
     device/samsung/spica/prebuilt/ril/libsecril-client.so:system/lib/libsecril-client.so \
+    device/samsung/spica/prebuilt/ril/libsecril-client.so:obj/lib/libsecril-client.so \
     device/samsung/spica/prebuilt/ril/libsec-ril.so:system/lib/libsec-ril.so \
     device/samsung/spica/prebuilt/ril/libril.so:system/lib/libril.so \
     device/samsung/spica/prebuilt/ril/efsd:system/bin/efsd
