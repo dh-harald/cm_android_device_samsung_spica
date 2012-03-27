@@ -1,12 +1,17 @@
 import init.spica.usb.rc
 
-on early-init
-    export EXTERNAL_STORAGE /mnt/sdcard
-    mkdir /mnt/sdcard 0000 system system
-    # for backwards compatibility
-    symlink /mnt/sdcard /sdcard
-
 on post-fs-data
+    mkdir /data/cache
+    chown system cache /data/cache
+    chmod 0771 /data/cache
+    symlink /data/cache /cache
+    chown system cache /cache
+    chmod 0771 /cache
+
+    # This may have been created by the recovery system with odd permissions
+    chown system cache /cache/recovery
+    chmod 0770 /cache/recovery
+
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp

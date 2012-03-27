@@ -44,6 +44,7 @@ DEVICE_PACKAGE_OVERLAYS := device/samsung/spica/overlay
 PRODUCT_COPY_FILES := \
     device/samsung/spica/egl.cfg:system/lib/egl/egl.cfg \
     device/samsung/spica/vold.fstab:system/etc/vold.fstab \
+    device/samsung/spica/recovery.fstab:system/etc/recovery.fstab \
     device/common/gps/gps.conf_EU_SUPL:system/etc/gps.conf
 #    device/common/gps/gps.conf_EU_SUPL:system/etc/gps.conf \
 #    device/samsung/spica/media_profiles.xml:system/etc/media_profiles.xml
@@ -53,7 +54,9 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/init.rc:root/init.rc \
     device/samsung/spica/init.spica.rc:root/init.spica.rc \
     device/samsung/spica/ueventd.spica.rc:root/ueventd.spica.rc \
-    device/samsung/spica/recovery.rc:root/recovery.rc
+    device/samsung/spica/recovery.rc:root/recovery.rc \
+    device/samsung/spica/recovery.fstab:root/system/etc/recovery.fstab
+
 
 # Prebuilt kl keymaps
 PRODUCT_COPY_FILES += \
