@@ -54,7 +54,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/spica/init.spica.rc:root/init.spica.rc \
     device/samsung/spica/ueventd.spica.rc:root/ueventd.spica.rc \
     device/samsung/spica/recovery.rc:root/recovery.rc \
-    device/samsung/spica/recovery.fstab:root/system/etc/recovery.fstab
+    device/samsung/spica/recovery.fstab:root/misc/recovery.fstab
 
 
 # Prebuilt kl keymaps

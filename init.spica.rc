@@ -20,6 +20,7 @@ on post-fs-data
 
 on boot
     mount debugfs /sys/kernel/debug /sys/kernel/debug
+    symlink /system/etc /etc
 
 # configure conservative cpufreq governor
     write /sys/devices/system/cpu/cpufreq/conservative/sampling_rate 200000
