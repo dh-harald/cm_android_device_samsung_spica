@@ -44,8 +44,9 @@ TARGET_PROVIDES_INIT_TARGET_RC := true
 BOARD_PROVIDES_BOOTMODE := true
 
 # Recovery
-#TARGET_RECOVERY_INITRC := device/samsung/spica/recovery.rc
-#BOARD_CUSTOM_RECOVERY_KEYMAPPING:= ../../device/samsung/spica/recovery/recovery_ui.c
+TARGET_RECOVERY_INITRC := device/samsung/spica/recovery.rc
+BOARD_CUSTOM_RECOVERY_KEYMAPPING:= ../../device/samsung/spica/recovery/recovery_keys.c
+BOARD_CUSTOM_RECOVERY_UI:= ../../device/samsung/spica/recovery/recovery_ui.c
 
 # Mobile data
 BOARD_MOBILEDATA_INTERFACE_NAME = "pdp0"
