@@ -141,8 +141,7 @@ WITH_WINDOWS_MEDIA:=true
 # The OpenGL ES API level that is natively supported by this device.
 # This is a 16.16 fixed point number
 PRODUCT_PROPERTY_OVERRIDES := \
-    ro.opengles.version=65537 \
-    ro.sf.lcd_density=160
+    ro.opengles.version=65537
 
 # These are the hardware-specific settings that are stored in system properties.
 # Note that the only such settings should be the ones that are too low-level to
