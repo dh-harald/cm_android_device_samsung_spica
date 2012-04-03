@@ -5,7 +5,7 @@ sysclktz 0
 loglevel 3
 
 # setup the global environment
-    export PATH /sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin:/bin
+    export PATH /sbin:/bin
     export LD_LIBRARY_PATH /vendor/lib:/system/lib
     export ANDROID_BOOTLOGO 1
     export ANDROID_ROOT /system
@@ -24,7 +24,7 @@ loglevel 3
 
 # Right now vendor lives on the same filesystem as system,
 # but someday that may change.
-    symlink /system/vendor /vendor
+#   symlink /system/vendor /vendor
 
 # create temp folder for recovery
     mkdir /tmp
