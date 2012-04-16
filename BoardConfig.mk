@@ -47,6 +47,11 @@ BOARD_PROVIDES_BOOTMODE := true
 TARGET_RECOVERY_INITRC := device/samsung/spica/recovery.rc
 BOARD_CUSTOM_RECOVERY_KEYMAPPING:= ../../device/samsung/spica/recovery/recovery_keys.c
 BOARD_CUSTOM_RECOVERY_UI:= ../../device/samsung/spica/recovery/recovery_ui.c
+BOARD_UMS_LUNFILE := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun/file"
+
+# vold
+BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
+TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/s3c-hsotg/gadget/lun0/file
 
 # Mobile data
 BOARD_MOBILEDATA_INTERFACE_NAME = "pdp0"
