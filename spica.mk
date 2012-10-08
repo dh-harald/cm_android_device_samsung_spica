@@ -91,6 +91,7 @@ PRODUCT_PACKAGES += \
     libs3cjpeg \
     libcamera \
     bdaddr_read \
+    crashguard \
     show_logo \
     gralloc.spica \
     libsecgps.so \
