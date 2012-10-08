@@ -40,6 +40,8 @@
 # application settings that are stored in resourced.
 DEVICE_PACKAGE_OVERLAYS := device/samsung/spica/overlay
 
+DISABLE_DEXPREOPT := false
+
 # These are the hardware-specific configuration files
 PRODUCT_COPY_FILES := \
     device/samsung/spica/egl.cfg:system/lib/egl/egl.cfg \
@@ -92,6 +94,7 @@ PRODUCT_PACKAGES += \
     show_logo \
     gralloc.spica \
     libsecgps.so \
+    dexpreopt \
     libGLES_fimg \
     hwcomposer.default \
     audio_policy.default \
@@ -152,8 +155,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
        ro.telephony.ril_class=SpicaRIL \
        ro.telephony.ril.v3=facilitylock,icccardstatus,signalstrength \
        mobiledata.interfaces=pdp0,wlan0,gprs,ppp0 \
+       dalvik.vm.dexopt-flags=m=y \
+       dalvik.vm.execution-mode=int:jit \
        dalvik.vm.heapsize=32m \
-       dalvik.vm.dexopt-data-only=1 \
+       dalvik.vm.dexopt-data-only=1
 
 # enable Google-specific location features,
 # like NetworkLocationProvider and LocationCollector
@@ -168,6 +173,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.kernel.android.checkjni=0 \
     dalvik.vm.checkjni=false
+
+# we have enough storage space to hold precise GC data
+PRODUCT_TAGS += dalvik.gc.type-precise
 
 PRODUCT_AAPT_CONFIG := normal mdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
