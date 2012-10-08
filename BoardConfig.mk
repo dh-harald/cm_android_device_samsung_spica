@@ -109,7 +109,6 @@ BOARD_GPS_LIBRARIES := libsecgps libsecril-client
 BOARD_USES_GPSSHIM := true
 
 # 3D
-TARGET_DO_NOT_SETS_CAN_DRAW := true
 TARGET_LIBAGL_USE_GRALLOC_COPYBITS := true
 BOARD_EGL_CFG := device/samsung/spica/egl.cfg
 USE_OPENGL_RENDERER := false
